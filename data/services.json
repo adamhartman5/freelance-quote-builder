@@ -1,0 +1,23 @@
+[
+  {
+    "id": "discovery",
+    "name": "Discovery workshop",
+    "description": "Clarify the audience, goals and priorities for a new product.",
+    "unit": "session",
+    "unitPriceCents": 15000
+  },
+  {
+    "id": "page-design",
+    "name": "Page design",
+    "description": "Design one responsive page with a clear visual hierarchy.",
+    "unit": "page",
+    "unitPriceCents": 22500
+  },
+  {
+    "id": "development",
+    "name": "Development",
+    "description": "Implement and refine product functionality.",
+    "unit": "hour",
+    "unitPriceCents": 12500
+  }
+]
