@@ -10,6 +10,11 @@ type Service = {
   unitPriceCents: number
 }
 
+type SelectedService = {
+  service: Service
+  quantity: number
+}
+
 export const Route = createFileRoute("/")({
   loader: async () => {
     const services = getServices()
@@ -20,25 +25,35 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const services = Route.useLoaderData()
-  const [selectedServices, setSelectedServices] = useState<Service[]>([])
+  const [selectedServices, setSelectedServices] = useState<SelectedService[]>([])
+  
 
   function addToCart(service: Service) {
     const selectedService = selectedServices.find(
-      (selectedService) => selectedService.id === service.id
+      (selectedService) => selectedService.service.id === service.id
     )
     if (!selectedService) {
-      setSelectedServices((prev) => [...prev, service])
+      setSelectedServices((prev) => [...prev, {service: service, quantity: 1}])
     }
   }
 
   function removeFromCart(service: Service) {
     const selectedService = selectedServices.find(
-      (selectedService) => selectedService.id === service.id
+      (selectedService) => selectedService.service.id === service.id
     )
     if (selectedService) {
       setSelectedServices((prev) =>
-        prev.filter((service) => service.id !== selectedService.id)
+        prev.filter((service) => service.service.id !== selectedService.service.id)
       )
+    }
+  }
+
+  function changeQuantity(service: Service, quantity: number){
+    const selectedService = selectedServices.find((selectedService) => selectedService.service.id === service.id)
+    if(!Number.isInteger(quantity) || quantity < 1 || quantity > 20)
+      return
+    if(selectedService){
+      setSelectedServices((prev) => prev.map((entry) => entry.service.id === service.id ? {...entry, quantity: quantity} : entry))
     }
   }
 
@@ -47,9 +62,8 @@ function Home() {
       <h1 className="text-3xl mb-6">Services Offered</h1>
       <div className="flex flex-wrap gap-2">
         {services.map((service) => (
-          <div className="flex gap-3">
+          <div key={service.id} className="flex gap-3">
             <Link
-              key={service.id}
               to="/services/$serviceId"
               params={{ serviceId: service.id }}
             >
@@ -69,7 +83,7 @@ function Home() {
             </Link>
             <div className="flex items-center">
               {selectedServices.find(
-                (selectedService) => service.id === selectedService.id
+                (selectedService) => service.id === selectedService.service.id
               ) ? (
                 <button
                   className="flex justify-center items-center border border-black rounded-lg px-6 py-3 bg-yellow-300"
@@ -91,13 +105,30 @@ function Home() {
       </div>
       <section className="mt-6">
         <h1 className="text-2xl">Selected Services</h1>
-        <div className="mt-2">
+        <div className="mt-2 w-80 px-2">
           {selectedServices.length === 0 ? (
             <p>No services selected</p>
           ) : (
-            selectedServices.map((selectedService) => (
-              <p key={selectedService.id}>{selectedService.name}</p>
-            ))
+            selectedServices.map((selectedService) => {
+              const inputId = `quantity-${selectedService.service.id}`
+              return (
+                <div key={selectedService.service.id} className='flex gap-2 pb-2 justify-between'>
+                  <p>{selectedService.service.name}</p>
+                  <div className='flex gap-2'>
+                    <label htmlFor="{inputId}">Qty</label>
+                    <input
+                      className='flex text-center border border-black rounded-sm w-12 pl-2' 
+                      id={inputId}
+                      type='number'
+                      min={1}
+                      max={20}
+                      step={1}
+                      value={selectedService.quantity}
+                      onChange={(event) => changeQuantity(selectedService.service, event.currentTarget.valueAsNumber)}  
+                    />
+                  </div>
+                </div>
+            )})
           )}
         </div>
       </section>
