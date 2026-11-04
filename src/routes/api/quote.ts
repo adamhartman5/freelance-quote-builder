@@ -10,7 +10,7 @@ type QuoteRequest = {
   quantity: number
 }
 
-type QuoteItem = {
+export type QuoteItem = {
   name: string,
   quantity: number
   unitPriceCents: number
