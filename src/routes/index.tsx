@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { getServices } from "../lib/services"
 import { QuoteItem } from './api/quote'
 
@@ -36,6 +36,7 @@ function Home() {
   const [quote, setQuote] = useState<QuoteResponse | null>(null)
   const [error, setError] = useState<string>('')
   const [status, setStatus] = useState<number>()
+  const selectionRevision = useRef(0)
   
 
   function addToCart(service: Service) {
@@ -47,15 +48,21 @@ function Home() {
       (selectedService) => selectedService.service.id === service.id
     )
     if (!selectedService) {
+      selectionRevision.current +=1
       setSelectedServices((prev) => [...prev, {service: service, quantity: 1}])
     }
   }
 
   function removeFromCart(service: Service) {
+    setQuote(null)
+    setError('')
+    setStatus(undefined)
+    
     const selectedService = selectedServices.find(
       (selectedService) => selectedService.service.id === service.id
     )
     if (selectedService) {
+      selectionRevision.current += 1
       setSelectedServices((prev) =>
         prev.filter((service) => service.service.id !== selectedService.service.id)
       )
@@ -63,15 +70,21 @@ function Home() {
   }
 
   function changeQuantity(service: Service, quantity: number){
+    setQuote(null)
+    setError('')
+    setStatus(undefined)
+
     const selectedService = selectedServices.find((selectedService) => selectedService.service.id === service.id)
     if(!Number.isInteger(quantity) || quantity < 1 || quantity > 20)
       return
     if(selectedService){
+      selectionRevision.current += 1
       setSelectedServices((prev) => prev.map((entry) => entry.service.id === service.id ? {...entry, quantity: quantity} : entry))
     }
   }
 
   async function handleQuote(selectedServices: SelectedService[]){
+    const submittedRevision = selectionRevision.current
     const response = await fetch('/api/quote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json'},
@@ -84,15 +97,25 @@ function Home() {
     })
 
     const result = await response.json()
-
-    if(!response.ok){
-      setStatus(response.status)
-      setError(result.error)
+    if(submittedRevision === selectionRevision.current){
+      if(!response.ok){
+        setStatus(response.status)
+        setError(result.error)
+      }
+      if(response.ok){
+        setQuote(result)
+      }
     }
-    
-    setQuote(result)
-    setSelectedServices([])
+
     return result
+  }
+
+  function clearQuote(){
+    setSelectedServices([])
+    setQuote(null)
+    setStatus(undefined)
+    setError('')
+    selectionRevision.current += 1
   }
 
   function centstoDollars(price: number, currencyUnit: string){
@@ -145,7 +168,6 @@ function Home() {
           </div>
         ))}
       </div>
-      { quote === null &&
         <section className="mt-6">
           <h1 className="text-2xl">Selected Services</h1>
           <div className="mt-2 w-80 px-2">
@@ -158,7 +180,7 @@ function Home() {
                   <div key={selectedService.service.id} className='flex gap-2 pb-2 justify-between'>
                     <p>{selectedService.service.name}</p>
                     <div className='flex gap-2'>
-                      <label htmlFor="{inputId}">Qty</label>
+                      <label htmlFor={inputId}>Qty</label>
                       <input
                         className='flex text-center border border-black rounded-sm w-12 pl-2' 
                         id={inputId}
@@ -175,7 +197,7 @@ function Home() {
             )}
           </div>
           <div>
-            {selectedServices.length > 0 && 
+            {selectedServices.length > 0 && quote === null &&
               <button 
                 className='border border-black rounded-lg px-6 py-3 bg-yellow-300'
                 onClick={() => handleQuote(selectedServices)}
@@ -190,18 +212,34 @@ function Home() {
             }
           </div>
         </section>
-      }
       { quote !== null &&
-        <section className='mt-6'>
+        <section className='mt-6 w-screen'>
             <h1 className='text-2xl'>Quoted Services</h1>
+            <div className='flex w-lg justify-between'>
+              <p className='w-40 text-left'>Service Name</p>
+              <p className='w-20 text-left'>Unit Price</p>
+              <p className='w-7 text-left'>Qty</p>
+              <p className='w-30 text-left'>Line Total Price</p>
+            </div>
             <div>
               {quote.items.map((lineItem) => (
-                <p>{lineItem.name} x{lineItem.quantity} : {centstoDollars(lineItem.lineTotalCents, quote.currency)}</p>
+                <div key={lineItem.name} className='flex justify-between w-lg'>
+                  <p className='text-left w-40'>{lineItem.name}</p>
+                  <p className='text-left w-20'>{centstoDollars(lineItem.unitPriceCents, quote.currency)}</p>
+                  <p className='text-center w-7'>{lineItem.quantity}</p>
+                  <p className='text-center w-30'>{centstoDollars(lineItem.lineTotalCents, quote.currency)} </p>
+                </div>
               ))}
             </div>
             <div>
               <p>Grand Total: {centstoDollars(quote.totalCents, quote.currency)}</p>
             </div>
+            <button 
+              className='border border-black rounded-lg px-6 py-3 bg-yellow-300'
+              onClick={()=> clearQuote()}
+            >
+            Clear Quote
+            </button>
         </section>
       }
     </main>
