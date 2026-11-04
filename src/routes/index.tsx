@@ -36,7 +36,9 @@ function Home() {
   const [quote, setQuote] = useState<QuoteResponse | null>(null)
   const [error, setError] = useState<string>('')
   const [status, setStatus] = useState<number>()
-  const selectionRevision = useRef(0)
+  const selectionRevision = useRef<number>(0)
+  const [pending, setPending] = useState<boolean>(false)
+  const lockQuote = useRef<boolean>(false)
   
 
   function addToCart(service: Service) {
@@ -84,8 +86,13 @@ function Home() {
   }
 
   async function handleQuote(selectedServices: SelectedService[]){
+    if(lockQuote.current) return
+
+    lockQuote.current = true
+    setPending(true)
     const submittedRevision = selectionRevision.current
-    const response = await fetch('/api/quote', {
+    try{
+      const response = await fetch('/api/quote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -108,6 +115,14 @@ function Home() {
     }
 
     return result
+    } catch (error){
+      if(error instanceof Error){
+        setError(error.message)
+      }
+    } finally {
+      lockQuote.current = false
+      setPending(false)
+    }
   }
 
   function clearQuote(){
@@ -201,8 +216,9 @@ function Home() {
               <button 
                 className='border border-black rounded-lg px-6 py-3 bg-yellow-300'
                 onClick={() => handleQuote(selectedServices)}
+                disabled={pending ? true : undefined}
               >
-                Quote Services
+                {pending ? 'Getting Quote...' :'Quote Services'}
               </button>
             }
           </div>
