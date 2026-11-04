@@ -82,9 +82,9 @@ export const Route = createFileRoute('/api/quote')({
           return Response.json({items: quote, totalCents, currency: 'USD'})
         } catch (error){
           if (error instanceof Error){
-            return Response.json({ error: `An error occurred while processing the request: ${error.message}`}, {status: 400})
+            console.log(error.message)
           }
-          return Response.json({ error: 'An error occurred while processing the request'}, {status: 400})
+          return Response.json({ error: 'An error occurred while processing the request'}, {status: 500})
         }
       }
     }
