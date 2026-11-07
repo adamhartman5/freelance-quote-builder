@@ -5,6 +5,8 @@ import {
   Scripts,
 } from "@tanstack/react-router"
 import stylesheet from "../styles.css?url"
+import Header from '../components/Header'
+import Footer from '../components/Footer'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -25,6 +27,7 @@ function Root() {
         <HeadContent />
       </head>
       <body>
+        <Header />
         <Outlet />
         <Scripts />
       </body>

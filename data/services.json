@@ -4,20 +4,23 @@
     "name": "Discovery workshop",
     "description": "Clarify the audience, goals and priorities for a new product.",
     "unit": "session",
-    "unitPriceCents": 15000
+    "unitPriceCents": 15000,
+    "pageDescription": "A focused engagement with a clear scope. We will help shape the right next step for your team"
   },
   {
     "id": "page-design",
     "name": "Page design",
     "description": "Design one responsive page with a clear visual hierarchy.",
     "unit": "page",
-    "unitPriceCents": 22500
+    "unitPriceCents": 22500,
+    "pageDescription": ""
   },
   {
     "id": "development",
     "name": "Development",
     "description": "Implement and refine product functionality.",
     "unit": "hour",
-    "unitPriceCents": 12500
+    "unitPriceCents": 12500,
+    "pageDescription": ""
   }
 ]

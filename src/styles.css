@@ -1,1 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-theme-1: oklch(0.9761 0.0041 91.446);
+  --color-theme-dark-green: oklch(0.3796 0.0563 179.433);
+  --color-theme-3: oklch(0.9162 0.0167 162.724);
+  --color-theme-4: oklch(0.6489 0.0245 175.515);
+  --color-theme-5: oklch(0.5626 0.0190 168.018);
+  --color-theme-amber: oklch(0.5949 0.1196 31.969);;
+  --color-theme-7: oklch(0.4842 0.0140 145.354);
+   --color-theme-cream: oklch(0.9700 0.0082 91.483);
+  --color-theme-off-white: oklch(0.9883 0.0029 84.559);
+  --color-theme-light-green: oklch(0.9010 0.0084 157.075);
+  --color-theme-muted-green: oklch(0.4348 0.0370 180.594);
+  --font-roboto: "Roboto", sans-serif; 
+}
